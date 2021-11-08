@@ -1,6 +1,7 @@
 package com.max.panel.ev3.views.commandpanel;
 
 import com.max.panel.ev3.Application;
+import com.max.panel.ev3.communication.CommunicationClient;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,12 +14,12 @@ import com.vaadin.flow.router.RouteAlias;
 import org.springframework.boot.SpringApplication;
 import org.vaadin.artur.helpers.LaunchUtil;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import static com.helger.commons.mock.CommonsAssert.assertEquals;
 
 @PageTitle("Command Panel")
 @Route(value = "panel", layout = MainLayout.class)
@@ -28,59 +29,39 @@ public class CommandPanelView extends HorizontalLayout {
     private TextField command;
     private Button commitCommand;
 
+
     public CommandPanelView() {
         {
 
 
             setMargin(true);
 
-            TextField response = new TextField("Server Response");
-            response.setReadOnly(true);
+            TextField responses = new TextField("Socket Response");
+            responses.setReadOnly(true);
 
             command = new TextField("Your command");
             commitCommand = new Button("Send");
-            add(command, commitCommand, response);
+            add(command, commitCommand, responses);
             setVerticalComponentAlignment(Alignment.END, command, commitCommand);
             commitCommand.addClickListener(e -> {
 
+                CommunicationClient client = new CommunicationClient();
                 try {
-                    response.setValue(sendCommand());
+                    client.startConnection("169.254.100.220", 6666);
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                } catch (ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                } catch (InterruptedException ex) {
+                }
+                String response = null;
+                try {
+                    response = client.sendMessage("hello server");
+                } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+                assertEquals("hello client", response);
 
             });
         }
 
     }
-
-    private String sendCommand() throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException  {
-        //get the localhost IP address, if server is running on some other IP, you need to use that
-        InetAddress host = InetAddress.getLocalHost();
-        Socket socket = null;
-        ObjectOutputStream oos = null;
-        ObjectInputStream ois = null;
-        //establish socket connection to server
-        socket = new Socket(host.getHostName(), 9876);
-        //write to socket using ObjectOutputStream
-        oos = new ObjectOutputStream(socket.getOutputStream());
-        System.out.println("Sending request to Socket Server");
-
-
-        oos.writeObject(command);
-        //read the server response message
-        ois = new ObjectInputStream(socket.getInputStream());
-        String message = (String) ois.readObject();
-        //close resources
-        ois.close();
-        oos.close();
-
-        return message;
-    }
-
 
 }
