@@ -1,9 +1,6 @@
 package com.max.panel.ev3.communication;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class CommunicationClient {
@@ -28,5 +25,10 @@ public class CommunicationClient {
         in.close();
         out.close();
         clientSocket.close();
+    }
+
+    public String sendMessage(InputStream inputStream) throws IOException {
+        out.println(inputStream);
+        return in.readLine();
     }
 }
