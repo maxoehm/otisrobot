@@ -32,30 +32,62 @@ import static com.helger.commons.mock.CommonsAssert.assertEquals;
 @RouteAlias(value = "", layout = MainLayout.class)
 public class CommandPanelView extends HorizontalLayout {
 
+
+    // Klassen Variablen initalisieren
     private TextField command;
     private Button commitCommand;
 
+    // Initialisieren der Variable und Wertezuweisung
     private String output = "Initializing session";
     private String sendCommand;
     private CommunicationClient client;
 
     public CommandPanelView() throws IOException {
 
-        setMargin(true);
+        /**
+         *  Programmierung des CommandPanels, definition und deklaration wichtiger UI Elemente.
+         *  Dabei dient folgender Code nur als Schnittstelle.
+         *
+         *  @see 51-56. CommandPanelView.java
+         * **/
 
+        setMargin(true);
         VerticalLayout verticalLayout = new VerticalLayout();
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-
         Button tryAgain = new Button("Try Again");
         tryAgain.addThemeVariants(ButtonVariant.LUMO_ERROR);
         tryAgain.setVisible(false);
-
         TextArea responses = new TextArea("Socket Response");
         responses.setReadOnly(true);
         responses.setWidth("80%");
+        tryAgain.getElement().getStyle().set("margin-top", "2.rem");
 
-        tryAgain.getStyle().set("margin-top", "2.rem");
+        command = new TextField("Your command");
+        commitCommand = new Button("Send");
+        add(command, commitCommand, responses);
+        setVerticalComponentAlignment(Alignment.END, command, commitCommand);
 
+        Dialog dialog = new Dialog(buildSoundFunctionality());
+        Button openDialog = new Button("Sound hochladen");
+        openDialog.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+
+        /*
+         * Im folgenden wird der Socket erstellt. Dazu wird die initialisierte @client Variable instanziiert (erkennbar durch 'new' Keyword).
+         *
+         * @exception IOException muss aufgefangen werden, daher try catch
+         * @see https://www.baeldung.com/java-socket
+         *
+         * @param ip
+         * @param port
+         * werden beide der Methode übergeben.
+         *
+         * Ein Port ist der Teil einer Netzwerk-Adresse, der die Zuordnung von TCP- und UDP-Verbindungen
+         * und -Datenpaketen zu Server- und Client-Programmen durch Betriebssysteme bewirkt.
+         * Zu jeder Verbindung dieser beiden Protokolle gehören zwei Ports,
+         * je einer auf Seiten des Clients und des Servers. Wikipedia
+         *
+         * */
 
         client = new CommunicationClient();
         try {
@@ -65,7 +97,13 @@ public class CommandPanelView extends HorizontalLayout {
         }
         String response = null;
 
-            try {
+
+        /*
+         *  Hier wird die Methode zum Senden der Commands aufgerufen und eine erste Nachricht mit dem Token
+         *  @param conEv3 übergeben, welcher zur verifikation des client dient.
+         *
+         */
+        try {
                 response = client.sendMessage("conEv3");
                 output = response.toString();
             } catch (IOException ex) {
@@ -75,6 +113,8 @@ public class CommandPanelView extends HorizontalLayout {
                 tryAgain.setVisible(true);
             }
 
+
+        // Wenn beim ersten Versuch die Verbindung nicht geklappt hat, wird ein "Try Again" Button angezeigt.
             tryAgain.addClickListener(event -> {
 
                 try {
@@ -90,14 +130,11 @@ public class CommandPanelView extends HorizontalLayout {
 
             });
 
-
+            // Output wird in die TextArea geschrieben.
             responses.setValue(output);
 
-            command = new TextField("Your command");
-            commitCommand = new Button("Send");
-            add(command, commitCommand, responses);
-            setVerticalComponentAlignment(Alignment.END, command, commitCommand);
 
+            // Befehl wird gesendet und eine Antwort erhalten, welche anschließend als Wert der TextArea festgelegt wird.
             commitCommand.addClickListener(e -> {
 
                 try {
@@ -115,15 +152,10 @@ public class CommandPanelView extends HorizontalLayout {
 
             });
 
-
+            // Socket wird geschlossen, wenn Seite aktualisiert oder geschlossen wird.
             if (UI.getCurrent().isClosing() || !UI.getCurrent().isAttached()) {
                 client.stopConnection();
             }
-
-
-            Dialog dialog = new Dialog(buildSoundFunctionality());
-            Button openDialog = new Button("Sound hochladen");
-            openDialog.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 
             openDialog.addClickListener(event -> {
 
@@ -153,7 +185,7 @@ public class CommandPanelView extends HorizontalLayout {
             }
         });
 
-        upload.getStyle().set("margin-top", "2.rem");
+        upload.getElement().getStyle().set("margin-top", "2.rem");
         verticalLayout.add(upload);
         return verticalLayout;
     }
