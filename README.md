@@ -1,6 +1,6 @@
 # OtisRobot
 
-Is an web app that communicates with an EV3 robot in the same network using Java sockets. The app enables the user to control the robot's movements and behaviors through sending commands. The app is designed to provide an intuitive, user-friendly interface that allows for easy control of the robot. Additionally, the app allows sending and receiving of data from the robot, which can be used for further development.
+A web app that communicates with an EV3 robot in the same network using Java sockets. The app enables the user to control the robot's movements and behaviors through sending commands. The app is designed to provide an intuitive, user-friendly interface that allows for easy control of the robot. Additionally, the app allows sending and receiving of data from the robot, which can be used for further development.
 
 ## Running the application
 
